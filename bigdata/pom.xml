@@ -14,6 +14,7 @@
     <scala.version>2.12.6</scala.version>
     <scala.compat.version>2.12</scala.compat.version>
     <spec2.version>4.2.0</spec2.version>
+    <spark.version>3.0.1</spark.version>
   </properties>
 
   <dependencies>
@@ -26,7 +27,7 @@
     <dependency>
       <groupId>org.apache.spark</groupId>
       <artifactId>spark-core_2.12</artifactId>
-      <version>3.0.1</version>
+      <version>${spark.version}</version>
     </dependency>
   </dependencies>
 
