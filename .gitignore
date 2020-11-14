@@ -1,2 +1,3 @@
 bigdata/.idea/*
 bigdata/*.iml
+bigdata/target/
