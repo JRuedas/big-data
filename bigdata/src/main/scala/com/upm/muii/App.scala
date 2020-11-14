@@ -1,5 +1,6 @@
 package com.upm.muii
 
+import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 
 import scala.io.StdIn
@@ -9,15 +10,28 @@ import scala.io.StdIn
  */
 object App {
 
-  def main(args : Array[String]) {
+  def configureSpark(): SparkContext = {
+
+    val conf = new SparkConf()
+      .setAppName("Big data project")
+      .setMaster("local")
+
+    new SparkContext(conf)
+  }
+
+  def loadData(context: SparkContext): RDD[String] = {
+
     println("Introduce the absolute path to the dataset file" )
     val filePath = StdIn.readLine()
+    context.textFile("file://" + filePath.trim())
+  }
 
-    val conf = new SparkConf().setAppName("Big data project").setMaster("local")
+  def main(args : Array[String]) {
 
-    val context = new SparkContext(conf)
-    val myData = context.textFile("file://" + filePath)
+    val sparkContext = configureSpark()
 
-    myData.take(10).foreach(println(_))
+    val myRdd = loadData(sparkContext)
+
+    myRdd.take(10).foreach(println(_))
   }
 }
