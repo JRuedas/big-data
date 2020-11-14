@@ -13,9 +13,9 @@ object App {
     println("Introduce the absolute path to the dataset file" )
     val filePath = StdIn.readLine()
 
-    val conf = new SparkConf().setAppName("Big data project")
-    val context = new SparkContext(conf)
+    val conf = new SparkConf().setAppName("Big data project").setMaster("local")
 
+    val context = new SparkContext(conf)
     val myData = context.textFile("file://" + filePath)
 
     myData.take(10).foreach(println(_))
