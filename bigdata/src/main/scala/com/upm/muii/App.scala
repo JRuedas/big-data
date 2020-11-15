@@ -1,7 +1,6 @@
 package com.upm.muii
 
-import org.apache.spark.rdd.RDD
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
 import scala.io.StdIn
 
@@ -16,29 +15,36 @@ object App {
   val MasterUrl = "local"
   val StorageProtocol = "file://"
 
-  def configureSpark(): SparkContext = {
+  def configureSpark(): SparkSession = {
 
-    val conf = new SparkConf()
-      .setAppName(AppName)
-      .setMaster(MasterUrl)
+    val sparkSession = new SparkSession.Builder()
+      .appName(AppName)
+      .master("local")
+      .getOrCreate()
 
-    new SparkContext(conf)
+    // To be able to parse from DataFrame to Dataset
+    import sparkSession.implicits._
+
+    sparkSession
   }
 
-  def loadData(context: SparkContext): RDD[String] = {
+  def loadData(session: SparkSession): DataFrame = {
 
     println("Introduce the absolute path to the dataset file")
     val filePath = StdIn.readLine().trim()
 
-    context.textFile(StorageProtocol + filePath)
+    session.read
+      .option("header", true)
+      .csv(StorageProtocol + filePath)
   }
 
   def main(args : Array[String]) {
 
-    val sparkContext = configureSpark()
+    val sparkSession = configureSpark()
 
-    val myRdd = loadData(sparkContext)
+    val dataFrame = loadData(sparkSession)
 
-    myRdd.take(10).foreach(println(_))
+    dataFrame.printSchema()
+    dataFrame.take(10).foreach(println(_))
   }
 }
