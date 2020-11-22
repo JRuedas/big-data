@@ -10,7 +10,7 @@
 ## from CRAN and then loaded.
 
 ## First specify the packages of interest
-packages = c("tidyverse")
+packages = c("tidyverse","corrgram","corrplot")
 
 ## Now load or install & load all
 package.check <- lapply(
@@ -24,7 +24,7 @@ package.check <- lapply(
 )
 
 # Load the dataset information
-flightsData <- read_csv(file = '../../dataverse_files/1987.csv')
+flightsData <- read_csv(file = '../../dataverse_files/2008.csv')
 
 # Remove forbidden variables
 forbidden <- c("ArrTime",
@@ -42,3 +42,22 @@ flightsData <- flightsData[, !(names(flightsData) %in% forbidden)]
 
 # Observe fist values
 head(flightsData)
+
+# Remove non numerical variables
+categorical <- c("UniqueCarrier",
+               "Origin",
+               "Dest",
+               "TailNum",
+               "CancellationCode")
+
+cleanflightsData <- (flightsData[, !(names(flightsData) %in% categorical)])
+
+numcols <- c('Year','Month','DayofMonth','DayOfWeek','DepTime','CRSDepTime','CRSArrTime','FlightNum','CRSElapsedTime',
+              'ArrDelay','DepDelay','Distance','TaxiOut')
+
+cleanflightsData<-cleanflightsData[colSums(!is.na(cleanflightsData)) > 0]
+cleanflightsData<-na.omit(cleanflightsData)
+# Correlation matrix
+cormatrix <- cor(cleanflightsData)
+corrgram(cormatrix)
+
