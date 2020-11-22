@@ -45,19 +45,22 @@ head(flightsData)
 
 # Remove non numerical variables
 categorical <- c("UniqueCarrier",
-               "Origin",
-               "Dest",
-               "TailNum",
-               "CancellationCode")
+                 "TailNum",
+                 "Origin",
+                 "Dest",
+                 "CancellationCode")
 
-cleanflightsData <- (flightsData[, !(names(flightsData) %in% categorical)])
+cleanFlightsData <- (flightsData[, !(names(flightsData) %in% categorical)])
 
-numcols <- c('Year','Month','DayofMonth','DayOfWeek','DepTime','CRSDepTime','CRSArrTime','FlightNum','CRSElapsedTime',
-              'ArrDelay','DepDelay','Distance','TaxiOut')
+# Clean columns full of NA values
+cleanFlightsData<-cleanFlightsData[colSums(!is.na(cleanFlightsData)) > 0]
+cleanFlightsData<-na.omit(cleanFlightsData)
 
-cleanflightsData<-cleanflightsData[colSums(!is.na(cleanflightsData)) > 0]
-cleanflightsData<-na.omit(cleanflightsData)
+# Plot histogram of variables vs ArrDelay
+# TODO: Arreglar ggplot(data = cleanflightsData, aes(x=DayofMonth, y=ArrDelay)) + labs(x="Mes", y="Retraso")
+
 # Correlation matrix
-cormatrix <- cor(cleanflightsData)
-corrgram(cormatrix)
+corMatrix <- cor(cleanFlightsData)
 
+# Correlation plot
+corrplot(corMatrix, method = "number", type = "upper", tl.col = "black", tl.srt = 45, bg = "grey55")
