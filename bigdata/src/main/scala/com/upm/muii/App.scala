@@ -5,7 +5,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 import scala.io.StdIn
 
 /**
- * @author Jose Dominguez Perez
+ * @author José Domínguez Pérez
  * @author Ismael Muñoz Aztout
  * @author Jonatan Ruedas Mora
  */
