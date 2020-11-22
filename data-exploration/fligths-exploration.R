@@ -10,7 +10,7 @@
 ## from CRAN and then loaded.
 
 ## First specify the packages of interest
-packages = c("tidyverse","corrgram","corrplot")
+packages = c("tidyverse","corrgram","corrplot","ggplot2")
 
 ## Now load or install & load all
 package.check <- lapply(
@@ -57,7 +57,17 @@ cleanFlightsData<-cleanFlightsData[colSums(!is.na(cleanFlightsData)) > 0]
 cleanFlightsData<-na.omit(cleanFlightsData)
 
 # Plot histogram of variables vs ArrDelay
-# TODO: Arreglar ggplot(data = cleanflightsData, aes(x=DayofMonth, y=ArrDelay)) + labs(x="Mes", y="Retraso")
+# TODO: Fix those charts to show distribution of delays related to a categorical variable
+daysAsFactor <- as.factor(cleanFlightsData$DayOfWeek) # Parses numerical to categorical 
+
+ggplot(data = cleanFlightsData, aes(x=Month, y=ArrDelay)) + labs(x="Month", y="Delay")
++ geom_line() + ggtitle("Evolution of delays during the year")
+
+ggplot(data = cleanFlightsData, aes(x=DayofMonth, y=ArrDelay)) + labs(x="Day of month", y="Delay")
++ geom_line() + ggtitle("Evolution of delays during the month")
+
+ggplot(data = cleanFlightsData, aes(x=daysAsFactor, y=ArrDelay)) + labs(x="Day of wek", y="Delay")
++ geom_bar(aes(fill=ArrDelay)) + ggtitle("Evolution of delays during the week")
 
 # Correlation matrix
 corMatrix <- cor(cleanFlightsData)
