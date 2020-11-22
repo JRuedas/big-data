@@ -1,3 +1,6 @@
 bigdata/.idea/*
 bigdata/*.iml
 bigdata/target/
+.Rproj.user
+data-exploration/.RData
+data-exploration/.Rhistory
