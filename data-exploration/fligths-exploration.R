@@ -38,10 +38,7 @@ forbidden <- c("ArrTime",
                "SecurityDelay",
                "LateAircraftDelay")
 
-flightsData <- flightsData[, !(names(flightsData) %in% forbidden)]
-
-# Observe fist values
-head(flightsData)
+cleanFlightsData <- flightsData[, !(names(flightsData) %in% forbidden)]
 
 # Remove non numerical variables
 categorical <- c("UniqueCarrier",
@@ -50,27 +47,22 @@ categorical <- c("UniqueCarrier",
                  "Dest",
                  "CancellationCode")
 
-cleanFlightsData <- (flightsData[, !(names(flightsData) %in% categorical)])
+cleanFlightsData <- (cleanFlightsData[, !(names(cleanFlightsData) %in% categorical)])
+
+# Remove useless variables
+useless <- c("Cancelled")
+
+cleanFlightsData <- (cleanFlightsData[, !(names(cleanFlightsData) %in% useless)])
 
 # Clean columns full of NA values
-cleanFlightsData<-cleanFlightsData[colSums(!is.na(cleanFlightsData)) > 0]
 cleanFlightsData<-na.omit(cleanFlightsData)
-
-# Plot histogram of variables vs ArrDelay
-# TODO: Fix those charts to show distribution of delays related to a categorical variable
-daysAsFactor <- as.factor(cleanFlightsData$DayOfWeek) # Parses numerical to categorical 
-
-ggplot(data = cleanFlightsData, aes(x=Month, y=ArrDelay)) + labs(x="Month", y="Delay")
-+ geom_line() + ggtitle("Evolution of delays during the year")
-
-ggplot(data = cleanFlightsData, aes(x=DayofMonth, y=ArrDelay)) + labs(x="Day of month", y="Delay")
-+ geom_line() + ggtitle("Evolution of delays during the month")
-
-ggplot(data = cleanFlightsData, aes(x=daysAsFactor, y=ArrDelay)) + labs(x="Day of wek", y="Delay")
-+ geom_bar(aes(fill=ArrDelay)) + ggtitle("Evolution of delays during the week")
+cleanFlightsData<-cleanFlightsData[colSums(!is.na(cleanFlightsData)) > 0]
 
 # Correlation matrix
 corMatrix <- cor(cleanFlightsData)
 
 # Correlation plot
 corrplot(corMatrix, method = "number", type = "upper", tl.col = "black", tl.srt = 45, bg = "grey55")
+
+# Scatterplot of ArrDelay and DepDelay
+ggplot(cleanFlightsData, aes(x=ArrDelay, y=DepDelay)) + geom_point()
