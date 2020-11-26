@@ -65,4 +65,4 @@ corMatrix <- cor(cleanFlightsData)
 corrplot(corMatrix, method = "number", type = "upper", tl.col = "black", tl.srt = 45, bg = "grey55")
 
 # Scatterplot of ArrDelay and DepDelay
-ggplot(cleanFlightsData, aes(x=ArrDelay, y=DepDelay)) + geom_point()
+ggplot(cleanFlightsData, aes(x=DepDelay, y=ArrDelay)) + geom_point(colour="blue", alpha=.4) + geom_abline(colour="red")
