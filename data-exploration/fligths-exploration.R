@@ -10,7 +10,7 @@
 ## from CRAN and then loaded.
 
 ## First specify the packages of interest
-packages = c("tidyverse","corrgram","corrplot","ggplot2")
+packages = c("tidyverse","corrgram","corrplot","ggplot2", "ppcor")
 
 ## Now load or install & load all
 package.check <- lapply(
@@ -24,7 +24,7 @@ package.check <- lapply(
 )
 
 # Load the dataset information
-flightsData <- read_csv(file = '../../dataverse_files/2008.csv')
+flightsData <- read_csv(file = '../../dataverse_files/1990.csv')
 
 # Remove forbidden variables
 forbidden <- c("ArrTime",
@@ -65,4 +65,11 @@ corMatrix <- cor(cleanFlightsData)
 corrplot(corMatrix, method = "number", type = "upper", tl.col = "black", tl.srt = 45, bg = "grey55")
 
 # Scatterplot of ArrDelay and DepDelay
-ggplot(cleanFlightsData, aes(x=DepDelay, y=ArrDelay)) + geom_point(colour="blue", alpha=.4) + geom_abline(colour="red")
+ggplot(cleanFlightsData, aes(x=DepDelay, y=ArrDelay)) + 
+  geom_point(colour="blue", alpha=.2) + 
+  geom_abline(colour="red") + theme_light()
+
+# Scatterplot of ArrDelay and TaxiOut
+ggplot(cleanFlightsData, aes(x=TaxiOut, y=ArrDelay)) + 
+  geom_point(colour="blue", alpha=.2) + 
+  geom_abline(colour="red") + theme_light()
