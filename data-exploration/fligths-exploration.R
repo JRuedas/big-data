@@ -24,7 +24,7 @@ package.check <- lapply(
 )
 
 # Load the dataset information
-flightsData <- read_csv(file = '../../dataverse_files/1990.csv')
+flightsData <- read_csv(file = '../../1987.csv')
 
 # Remove forbidden variables
 forbidden <- c("ArrTime",
@@ -55,8 +55,8 @@ useless <- c("Cancelled")
 cleanFlightsData <- (cleanFlightsData[, !(names(cleanFlightsData) %in% useless)])
 
 # Clean columns full of NA values
-cleanFlightsData<-na.omit(cleanFlightsData)
 cleanFlightsData<-cleanFlightsData[colSums(!is.na(cleanFlightsData)) > 0]
+cleanFlightsData<-na.omit(cleanFlightsData)
 
 # Correlation matrix
 corMatrix <- cor(cleanFlightsData)

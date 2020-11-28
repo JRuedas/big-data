@@ -4,3 +4,4 @@ bigdata/target/
 .Rproj.user
 data-exploration/.RData
 data-exploration/.Rhistory
+*.DS_STORE
