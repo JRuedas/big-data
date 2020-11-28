@@ -26,6 +26,25 @@ object App {
                                             "SecurityDelay",
                                             "LateAircraftDelay")
 
+  val UselessVars: Array[String] = Array(
+    "Year",
+    "Month",
+    "DayofMonth",
+    "DayOfWeek",
+    "DepTime",
+    "CRSDepTime",
+    "FlightNum",
+    "CRSElapsedTime",
+    "Distance",
+    "Cancelled",
+    "UniqueCarrier",
+    "TailNum",
+    "Origin",
+    "Dest",
+    "CancellationCode",
+    "CRSArrTime"
+  )
+
   def configureSpark(): SparkSession = {
 
     val sparkSession = new SparkSession.Builder()
@@ -49,11 +68,11 @@ object App {
       .csv(StorageProtocol + filePath)
   }
 
-  def filterForbiddenVariables(data: DataFrame, forbiddenVars: Array[String]): DataFrame = {
+  def filterVariables(data: DataFrame, vars: Array[String]): DataFrame = {
 
     var dataCleaned: DataFrame = data
-    for (forbiddenVar <- forbiddenVars) {
-      dataCleaned = dataCleaned.drop(forbiddenVar)
+    for (variable <- vars) {
+      dataCleaned = dataCleaned.drop(variable)
     }
 
     dataCleaned
@@ -65,8 +84,9 @@ object App {
 
     val df = loadData(sparkSession)
 
-    val dfNoForbidden = filterForbiddenVariables(df, ForbiddenVars)
-    dfNoForbidden.printSchema()
-    dfNoForbidden.take(5).foreach(println(_))
+    val dfNoForbidden = filterVariables(df, ForbiddenVars)
+    val dfCleaned = filterVariables(dfNoForbidden, UselessVars)
+    dfCleaned.printSchema()
+    dfCleaned.take(5).foreach(println(_))
   }
 }

@@ -24,7 +24,7 @@ package.check <- lapply(
 )
 
 # Load the dataset information
-flightsData <- read_csv(file = '../../1987.csv')
+flightsData <- read_csv(file = '../../2008.csv')
 
 # Remove forbidden variables
 forbidden <- c("ArrTime",
