@@ -1,6 +1,7 @@
 package com.upm.muii
 
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.ml.regression.LinearRegression
 
 import scala.io.StdIn
 
@@ -88,5 +89,14 @@ object App {
     val dfCleaned = filterVariables(dfNoForbidden, UselessVars)
     dfCleaned.printSchema()
     dfCleaned.take(5).foreach(println(_))
+
+    val lr = new LinearRegression()
+      .setFeaturesCol("ArrDelay")
+      .setLabelCol("PredictedDelay")
+      .setMaxIter(10)
+      .setElasticNetParam(0.8)
+
+    val lrModel = lr.fit(dfCleaned)
+    println(s"Coefficients: ${lrModel.coefficients}")
   }
 }
