@@ -27,24 +27,22 @@ object App {
                                             "SecurityDelay",
                                             "LateAircraftDelay")
 
-  val UselessVars: Array[String] = Array(
-    "Year",
-    "Month",
-    "DayofMonth",
-    "DayOfWeek",
-    "DepTime",
-    "CRSDepTime",
-    "FlightNum",
-    "CRSElapsedTime",
-    "Distance",
-    "Cancelled",
-    "UniqueCarrier",
-    "TailNum",
-    "Origin",
-    "Dest",
-    "CancellationCode",
-    "CRSArrTime"
-  )
+  val UselessVars: Array[String] = Array("Year",
+                                        "Month",
+                                        "DayofMonth",
+                                        "DayOfWeek",
+                                        "DepTime",
+                                        "CRSDepTime",
+                                        "FlightNum",
+                                        "CRSElapsedTime",
+                                        "Distance",
+                                        "Cancelled",
+                                        "UniqueCarrier",
+                                        "TailNum",
+                                        "Origin",
+                                        "Dest",
+                                        "CancellationCode",
+                                        "CRSArrTime")
 
   def configureSpark(): SparkSession = {
 
@@ -91,10 +89,10 @@ object App {
     dfCleaned.take(5).foreach(println(_))
 
     val lr = new LinearRegression()
-      .setFeaturesCol("ArrDelay")
-      .setLabelCol("PredictedDelay")
-      .setMaxIter(10)
-      .setElasticNetParam(0.8)
+                              .setFeaturesCol("ArrDelay")
+                              .setLabelCol("PredictedDelay")
+                              .setMaxIter(10)
+                              .setElasticNetParam(0.8)
 
     val lrModel = lr.fit(dfCleaned)
     println(s"Coefficients: ${lrModel.coefficients}")
