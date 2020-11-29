@@ -3,7 +3,7 @@ package com.upm.muii
 import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.ml.regression.LinearRegression
-import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
+import org.apache.spark.sql.types.{DoubleType, StringType, StructField, StructType}
 
 import scala.io.StdIn
 
@@ -48,35 +48,35 @@ object App {
   val SecurityDelay = "SecurityDelay"
   val LateAircraftDelay = "LateAircraftDelay"
 
-  val FlightSchema = StructType(Array(StructField(Year, IntegerType, true),
-                                StructField(Month, IntegerType, true),
-                                StructField(DayOfMonth, IntegerType, true),
-                                StructField(DayOfWeek, IntegerType, true),
-                                StructField(DepTime, IntegerType, true),
-                                StructField(CRSDepTime, IntegerType, true),
-                                StructField(ArrTime, IntegerType, true),
-                                StructField(CRSArrTime, IntegerType, true),
+  val FlightSchema = StructType(Array(StructField(Year, DoubleType, true),
+                                StructField(Month, DoubleType, true),
+                                StructField(DayOfMonth, DoubleType, true),
+                                StructField(DayOfWeek, DoubleType, true),
+                                StructField(DepTime, DoubleType, true),
+                                StructField(CRSDepTime, DoubleType, true),
+                                StructField(ArrTime, DoubleType, true),
+                                StructField(CRSArrTime, DoubleType, true),
                                 StructField(UniqueCarrier, StringType, true),
-                                StructField(FlightNum, IntegerType, true),
+                                StructField(FlightNum, DoubleType, true),
                                 StructField(TailNum, StringType, true),
-                                StructField(ActualElapsedTime, IntegerType, true),
-                                StructField(CRSElapsedTime, IntegerType, true),
-                                StructField(AirTime, IntegerType, true),
-                                StructField(ArrDelay, IntegerType, true),
-                                StructField(DepDelay, IntegerType, true),
+                                StructField(ActualElapsedTime, DoubleType, true),
+                                StructField(CRSElapsedTime, DoubleType, true),
+                                StructField(AirTime, DoubleType, true),
+                                StructField(ArrDelay, DoubleType, true),
+                                StructField(DepDelay, DoubleType, true),
                                 StructField(Origin, StringType, true),
                                 StructField(Dest, StringType, true),
-                                StructField(Distance, IntegerType, true),
-                                StructField(TaxiIn, IntegerType, true),
-                                StructField(TaxiOut, IntegerType, true),
-                                StructField(Cancelled, IntegerType, true),
+                                StructField(Distance, DoubleType, true),
+                                StructField(TaxiIn, DoubleType, true),
+                                StructField(TaxiOut, DoubleType, true),
+                                StructField(Cancelled, DoubleType, true),
                                 StructField(CancellationCode, StringType, true),
-                                StructField(Diverted, IntegerType, true),
-                                StructField(CarrierDelay, IntegerType, true),
-                                StructField(WeatherDelay, IntegerType, true),
-                                StructField(NASDelay, IntegerType, true),
-                                StructField(SecurityDelay, IntegerType, true),
-                                StructField(LateAircraftDelay, IntegerType, true)
+                                StructField(Diverted, DoubleType, true),
+                                StructField(CarrierDelay, DoubleType, true),
+                                StructField(WeatherDelay, DoubleType, true),
+                                StructField(NASDelay, DoubleType, true),
+                                StructField(SecurityDelay, DoubleType, true),
+                                StructField(LateAircraftDelay, DoubleType, true)
                               ))
 
   val ForbiddenVars: Array[String] = Array(ArrTime,
@@ -149,18 +149,19 @@ object App {
     val df = loadData(sparkSession)
 
     val dfNoForbidden = filterVariables(df, ForbiddenVars)
-    val dfCleaned = filterVariables(dfNoForbidden, UselessVars)
+    val dfCleaned = filterVariables(dfNoForbidden, UselessVars).na.fill(0)
+
+    println("Cleaned")
+    dfCleaned.take(10).foreach(println(_))
 
     val split = dfCleaned.randomSplit(Array(0.7,0.3))
     val training = split(0)
 
     println("Training")
-    training.printSchema()
     training.take(10).foreach(println(_))
 
     val test = split(1)
     println("Test")
-    test.printSchema()
     test.take(10).foreach(println(_))
 
     val assembler = new VectorAssembler()
@@ -170,34 +171,34 @@ object App {
 
     val regression = new LinearRegression()
                                 .setFeaturesCol("features")
-                                .setLabelCol("ArrDelay")
+                                .setLabelCol(ArrDelay)
                                 .setMaxIter(10)
                                 .setElasticNetParam(0.8)
 
     val dsTrain = assembler.transform(training)
 
     println("Transformed")
-    dsTrain.printSchema()
-    dsTrain.take(5).foreach(println(_))
+    training.take(10).foreach(println(_))
 
     val lrModel = regression.fit(dsTrain)
 
-//    println("---------------------Training----------------------------------------------")
-//
-//    println(s"Coefficients: ${lrModel.coefficients}")
-//    println(s"Intercept: ${lrModel.intercept}")
-//
-//    val trainingSummary = lrModel.summary
-//    println(s"numIterations: ${trainingSummary.totalIterations}")
-//    println(s"objectiveHistory: ${trainingSummary.objectiveHistory.toList}")
-//
-//    trainingSummary.residuals.show()
-//
-//    println(s"RMSE: ${trainingSummary.rootMeanSquaredError}")
-//    println(s"r2: ${trainingSummary.r2}")
-//
-//    println("---------------------Test----------------------------------------------")
-//
-//    lrModel.transform(test).show(truncate = false)
+    println("---------------------Training----------------------------------------------")
+
+    println(s"Coefficients: ${lrModel.coefficients}")
+    println(s"Intercept: ${lrModel.intercept}")
+
+    val trainingSummary = lrModel.summary
+    println(s"numIterations: ${trainingSummary.totalIterations}")
+    println(s"objectiveHistory: ${trainingSummary.objectiveHistory.toList}")
+
+    trainingSummary.residuals.show()
+
+    println(s"RMSE: ${trainingSummary.rootMeanSquaredError}")
+    println(s"r2: ${trainingSummary.r2}")
+
+    println("---------------------Test----------------------------------------------")
+
+    val dsTest = assembler.transform(test)
+    lrModel.transform(dsTest).show(truncate = false)
   }
 }
