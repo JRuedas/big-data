@@ -6,6 +6,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.ml.regression.LinearRegression
 import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
 import org.apache.spark.sql.functions._
+import org.apache.spark.ml.regression.LinearRegressionModel
 
 import scala.io.StdIn
 
@@ -178,16 +179,16 @@ object App {
     //val dsTrain = assembler.transform(training)
     //val lrModel = regression.fit(dsTrain)
 
-   /* println("---------------------Summary----------------------------------------------")
+    println("---------------------Summary----------------------------------------------")
 
-    val trainingSummary = lrModel.summary
+    val trainingSummary = pipeModel.stages.last.asInstanceOf[LinearRegressionModel].summary
     trainingSummary.residuals.show()
     println(s"RMSE: ${trainingSummary.rootMeanSquaredError}")
     println(s"r2: ${trainingSummary.r2}")
 
     println("---------------------Result----------------------------------------------")
 
-    val dsTest = assembler.transform(test)
+   /* val dsTest = assembler.transform(test)
     lrModel.transform(dsTest).show(50)
     lrModel.transform(dsTest).orderBy(desc("prediction")).show(50)*/
   }
