@@ -3,7 +3,8 @@ package com.upm.muii
 import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.ml.regression.LinearRegression
-import org.apache.spark.sql.types.{DoubleType, StringType, StructField, StructType}
+import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
+import org.apache.spark.sql.functions._
 
 import scala.io.StdIn
 
@@ -48,35 +49,35 @@ object App {
   val SecurityDelay = "SecurityDelay"
   val LateAircraftDelay = "LateAircraftDelay"
 
-  val FlightSchema = StructType(Array(StructField(Year, DoubleType, true),
-                                StructField(Month, DoubleType, true),
-                                StructField(DayOfMonth, DoubleType, true),
-                                StructField(DayOfWeek, DoubleType, true),
-                                StructField(DepTime, DoubleType, true),
-                                StructField(CRSDepTime, DoubleType, true),
-                                StructField(ArrTime, DoubleType, true),
-                                StructField(CRSArrTime, DoubleType, true),
+  val FlightSchema = StructType(Array(StructField(Year, IntegerType, true),
+                                StructField(Month, IntegerType, true),
+                                StructField(DayOfMonth, IntegerType, true),
+                                StructField(DayOfWeek, IntegerType, true),
+                                StructField(DepTime, IntegerType, true),
+                                StructField(CRSDepTime, IntegerType, true),
+                                StructField(ArrTime, IntegerType, true),
+                                StructField(CRSArrTime, IntegerType, true),
                                 StructField(UniqueCarrier, StringType, true),
-                                StructField(FlightNum, DoubleType, true),
+                                StructField(FlightNum, IntegerType, true),
                                 StructField(TailNum, StringType, true),
-                                StructField(ActualElapsedTime, DoubleType, true),
-                                StructField(CRSElapsedTime, DoubleType, true),
-                                StructField(AirTime, DoubleType, true),
-                                StructField(ArrDelay, DoubleType, true),
-                                StructField(DepDelay, DoubleType, true),
+                                StructField(ActualElapsedTime, IntegerType, true),
+                                StructField(CRSElapsedTime, IntegerType, true),
+                                StructField(AirTime, IntegerType, true),
+                                StructField(ArrDelay, IntegerType, true),
+                                StructField(DepDelay, IntegerType, true),
                                 StructField(Origin, StringType, true),
                                 StructField(Dest, StringType, true),
-                                StructField(Distance, DoubleType, true),
-                                StructField(TaxiIn, DoubleType, true),
-                                StructField(TaxiOut, DoubleType, true),
-                                StructField(Cancelled, DoubleType, true),
+                                StructField(Distance, IntegerType, true),
+                                StructField(TaxiIn, IntegerType, true),
+                                StructField(TaxiOut, IntegerType, true),
+                                StructField(Cancelled, IntegerType, true),
                                 StructField(CancellationCode, StringType, true),
-                                StructField(Diverted, DoubleType, true),
-                                StructField(CarrierDelay, DoubleType, true),
-                                StructField(WeatherDelay, DoubleType, true),
-                                StructField(NASDelay, DoubleType, true),
-                                StructField(SecurityDelay, DoubleType, true),
-                                StructField(LateAircraftDelay, DoubleType, true)
+                                StructField(Diverted, IntegerType, true),
+                                StructField(CarrierDelay, IntegerType, true),
+                                StructField(WeatherDelay, IntegerType, true),
+                                StructField(NASDelay, IntegerType, true),
+                                StructField(SecurityDelay, IntegerType, true),
+                                StructField(LateAircraftDelay, IntegerType, true)
                               ))
 
   val ForbiddenVars: Array[String] = Array(ArrTime,
@@ -159,15 +160,14 @@ object App {
 
     println("Training")
     training.take(10).foreach(println(_))
-
     val test = split(1)
+
     println("Test")
     test.take(10).foreach(println(_))
 
     val assembler = new VectorAssembler()
                                       .setInputCols(Array(DepDelay,TaxiOut))
                                       .setOutputCol("features")
-                                      .setHandleInvalid("skip")
 
     val regression = new LinearRegression()
                                 .setFeaturesCol("features")
@@ -199,6 +199,7 @@ object App {
     println("---------------------Test----------------------------------------------")
 
     val dsTest = assembler.transform(test)
-    lrModel.transform(dsTest).show(truncate = false)
+    lrModel.transform(dsTest).show(50)
+    lrModel.transform(dsTest).orderBy(desc("prediction")).show(50)
   }
 }
