@@ -152,18 +152,11 @@ object App {
     val dfNoForbidden = filterVariables(df, ForbiddenVars)
     val dfCleaned = filterVariables(dfNoForbidden, UselessVars).na.fill(0)
 
-    println("Cleaned")
-    dfCleaned.take(10).foreach(println(_))
 
     val split = dfCleaned.randomSplit(Array(0.7,0.3))
     val training = split(0)
 
-    println("Training")
-    training.take(10).foreach(println(_))
     val test = split(1)
-
-    println("Test")
-    test.take(10).foreach(println(_))
 
     val assembler = new VectorAssembler()
                                       .setInputCols(Array(DepDelay,TaxiOut))
@@ -176,27 +169,16 @@ object App {
                                 .setElasticNetParam(0.8)
 
     val dsTrain = assembler.transform(training)
-
-    println("Transformed")
-    training.take(10).foreach(println(_))
-
     val lrModel = regression.fit(dsTrain)
 
-    println("---------------------Training----------------------------------------------")
-
-    println(s"Coefficients: ${lrModel.coefficients}")
-    println(s"Intercept: ${lrModel.intercept}")
+    println("---------------------Summary----------------------------------------------")
 
     val trainingSummary = lrModel.summary
-    println(s"numIterations: ${trainingSummary.totalIterations}")
-    println(s"objectiveHistory: ${trainingSummary.objectiveHistory.toList}")
-
     trainingSummary.residuals.show()
-
     println(s"RMSE: ${trainingSummary.rootMeanSquaredError}")
     println(s"r2: ${trainingSummary.r2}")
 
-    println("---------------------Test----------------------------------------------")
+    println("---------------------Result----------------------------------------------")
 
     val dsTest = assembler.transform(test)
     lrModel.transform(dsTest).show(50)
