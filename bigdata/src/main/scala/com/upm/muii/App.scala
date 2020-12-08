@@ -200,11 +200,11 @@ object App {
     }
 
     println("---------------------Summary----------------------------------------------")
-    val predictions2 =  predictions.select("features", ArrDelay)
+    val predictions2 =  predictions.select("prediction","features", ArrDelay)
 
     val evaluator = new RegressionEvaluator()
       .setLabelCol(ArrDelay)
-      .setPredictionCol("features")
+      .setPredictionCol("prediction")
       .setMetricName("rmse")
 
     val rmse = evaluator.evaluate(predictions2)
