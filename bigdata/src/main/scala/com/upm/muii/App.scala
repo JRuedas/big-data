@@ -4,9 +4,10 @@ import org.apache.spark.ml.{Pipeline, PipelineModel}
 import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 import org.apache.spark.ml.regression.{GBTRegressionModel, GBTRegressor, LinearRegression, LinearRegressionModel}
-import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
+import org.apache.spark.sql.types.{DoubleType, IntegerType, StringType, StructField, StructType}
 import org.apache.spark.sql.functions._
 import org.apache.spark.ml.evaluation.RegressionEvaluator
+import org.apache.spark.mllib.evaluation.RegressionMetrics
 
 import scala.io.StdIn
 
@@ -165,8 +166,8 @@ object App {
                                       .setOutputCol("features")
 
     val regressionTechnique=0
-    var pipeModel: PipelineModel=null
-    var predictions: Dataset[_]=null
+    var pipeModel: PipelineModel = null
+    var predictions: Dataset[_] = null
 
     regressionTechnique match{
       case 1=>
@@ -193,20 +194,20 @@ object App {
         pipeModel= pipeline.fit(training)
 
         predictions = pipeModel.transform(test)
-          predictions.show(50,truncate = false)
-          predictions.orderBy(desc("prediction")).show(50)
+        predictions.show(50,truncate = false)
+        predictions.orderBy(desc("prediction")).show(50)
 
     }
 
     println("---------------------Summary----------------------------------------------")
+    val predictions2 =  predictions.select("features", ArrDelay)
 
-    //val predictions2= predictions.rdd.map(x =>
-    //        (x(0).asInstanceOf[Double], x(1).asInstanceOf[Double])))
     val evaluator = new RegressionEvaluator()
       .setLabelCol(ArrDelay)
       .setPredictionCol("features")
       .setMetricName("rmse")
-    val rmse = evaluator.evaluate(predictions)
+
+    val rmse = evaluator.evaluate(predictions2)
     println("Root Mean Squared Error (RMSE) on test data = " + rmse)
 
     /*val trainingSummary = pipeModel.stages.last.asInstanceOf[LinearRegressionModel].summary
