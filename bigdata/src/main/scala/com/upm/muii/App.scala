@@ -1,12 +1,12 @@
 package com.upm.muii
 
-import org.apache.spark.ml.Pipeline
+import org.apache.spark.ml.{Pipeline, PipelineModel}
 import org.apache.spark.ml.feature.VectorAssembler
-import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.ml.regression.LinearRegression
+import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
+import org.apache.spark.ml.regression.{GBTRegressionModel, GBTRegressor, LinearRegression, LinearRegressionModel}
 import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
 import org.apache.spark.sql.functions._
-import org.apache.spark.ml.regression.LinearRegressionModel
+import org.apache.spark.ml.evaluation.RegressionEvaluator
 
 import scala.io.StdIn
 
@@ -164,32 +164,59 @@ object App {
                                       .setInputCols(Array(DepDelay,TaxiOut))
                                       .setOutputCol("features")
 
-    val regression = new LinearRegression()
-                                .setFeaturesCol("features")
-                                .setLabelCol(ArrDelay)
-                                .setMaxIter(10)
-                                .setElasticNetParam(0.8)
+    val regressionTechnique=0
+    var pipeModel: PipelineModel=null
+    var predictions: Dataset[_]=null
 
-    val pipeline =new Pipeline().setStages(Array(assembler,regression))
-    val pipeModel= pipeline.fit(training)
+    regressionTechnique match{
+      case 1=>
+        println("Regression")
+        val regression = new LinearRegression()
+                    .setFeaturesCol("features")
+                    .setLabelCol(ArrDelay)
+                    .setMaxIter(10)
+                    .setElasticNetParam(0.8)
 
-    pipeModel.transform(test).show(50,truncate = false)
-    pipeModel.transform(test).orderBy(desc("prediction")).show(50)
+                    val pipeline =new Pipeline().setStages(Array(assembler,regression))
+                    pipeModel= pipeline.fit(training)
 
-    //val dsTrain = assembler.transform(training)
-    //val lrModel = regression.fit(dsTrain)
+                    pipeModel.transform(test).show(50,truncate = false)
+                    pipeModel.transform(test).orderBy(desc("prediction")).show(50)
+      case _=>
+        println("GBT")
+        val gbt = new GBTRegressor()
+                        .setLabelCol(ArrDelay)
+                        .setFeaturesCol("features")
+                        .setMaxIter(10)
+
+        val pipeline =new Pipeline().setStages(Array(assembler,gbt))
+        pipeModel= pipeline.fit(training)
+
+        predictions = pipeModel.transform(test)
+          predictions.show(50,truncate = false)
+          predictions.orderBy(desc("prediction")).show(50)
+
+    }
 
     println("---------------------Summary----------------------------------------------")
 
-    val trainingSummary = pipeModel.stages.last.asInstanceOf[LinearRegressionModel].summary
+    //val predictions2= predictions.rdd.map(x =>
+    //        (x(0).asInstanceOf[Double], x(1).asInstanceOf[Double])))
+    val evaluator = new RegressionEvaluator()
+      .setLabelCol(ArrDelay)
+      .setPredictionCol("features")
+      .setMetricName("rmse")
+    val rmse = evaluator.evaluate(predictions)
+    println("Root Mean Squared Error (RMSE) on test data = " + rmse)
+
+    /*val trainingSummary = pipeModel.stages.last.asInstanceOf[LinearRegressionModel].summary
+    val trainingSummary = pipeModel.stages.last.asInstanceOf[GBTRegressionModel].sum
     trainingSummary.residuals.show()
     println(s"RMSE: ${trainingSummary.rootMeanSquaredError}")
-    println(s"r2: ${trainingSummary.r2}")
+    println(s"r2: ${trainingSummary.r2}")*/
 
     println("---------------------Result----------------------------------------------")
 
-   /* val dsTest = assembler.transform(test)
-    lrModel.transform(dsTest).show(50)
-    lrModel.transform(dsTest).orderBy(desc("prediction")).show(50)*/
+
   }
 }
