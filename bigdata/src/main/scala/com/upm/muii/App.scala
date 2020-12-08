@@ -1,13 +1,12 @@
 package com.upm.muii
 
-import org.apache.spark.ml.{Pipeline, PipelineModel}
+import org.apache.spark.ml.{Pipeline, PipelineStage}
 import org.apache.spark.ml.feature.VectorAssembler
-import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.ml.regression.{GBTRegressionModel, GBTRegressor, LinearRegression, LinearRegressionModel}
-import org.apache.spark.sql.types.{DoubleType, IntegerType, StringType, StructField, StructType}
+import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
 import org.apache.spark.sql.functions._
 import org.apache.spark.ml.evaluation.RegressionEvaluator
-import org.apache.spark.mllib.evaluation.RegressionMetrics
 
 import scala.io.StdIn
 
@@ -155,7 +154,6 @@ object App {
     val dfNoForbidden = filterVariables(df, ForbiddenVars)
     val dfCleaned = filterVariables(dfNoForbidden, UselessVars).na.fill(0)
 
-
     val split = dfCleaned.randomSplit(Array(0.7,0.3))
     val training = split(0)
 
@@ -165,59 +163,76 @@ object App {
                                       .setInputCols(Array(DepDelay,TaxiOut))
                                       .setOutputCol("features")
 
-    val regressionTechnique=0
-    var pipeModel: PipelineModel = null
-    var predictions: Dataset[_] = null
+    val regressionTechnique: Int = 0
 
-    regressionTechnique match{
-      case 1=>
-        println("Regression")
+    var pipelineStages: Array[PipelineStage] = null
+
+    regressionTechnique match {
+      case 0 =>
+
+        println("You have chosen the Linear Regression technique")
+
         val regression = new LinearRegression()
-                    .setFeaturesCol("features")
-                    .setLabelCol(ArrDelay)
-                    .setMaxIter(10)
-                    .setElasticNetParam(0.8)
+                                .setFeaturesCol("features")
+                                .setLabelCol(ArrDelay)
+                                .setMaxIter(10)
+                                .setElasticNetParam(0.8)
 
-                    val pipeline =new Pipeline().setStages(Array(assembler,regression))
-                    pipeModel= pipeline.fit(training)
+        pipelineStages = Array(assembler,regression)
 
-                    pipeModel.transform(test).show(50,truncate = false)
-                    pipeModel.transform(test).orderBy(desc("prediction")).show(50)
-      case _=>
-        println("GBT")
+      case _ =>
+
+        println("You have chosen the Gradient Boost Tree technique")
+
         val gbt = new GBTRegressor()
-                        .setLabelCol(ArrDelay)
                         .setFeaturesCol("features")
+                        .setLabelCol(ArrDelay)
                         .setMaxIter(10)
 
-        val pipeline =new Pipeline().setStages(Array(assembler,gbt))
-        pipeModel= pipeline.fit(training)
-
-        predictions = pipeModel.transform(test)
-        predictions.show(50,truncate = false)
-        predictions.orderBy(desc("prediction")).show(50)
-
+        pipelineStages = Array(assembler, gbt)
     }
 
-    println("---------------------Summary----------------------------------------------")
-    val predictions2 =  predictions.select("prediction","features", ArrDelay)
+    val pipeline = new Pipeline().setStages(pipelineStages)
+    val pipelineModel = pipeline.fit(training)
 
-    val evaluator = new RegressionEvaluator()
+    var predictions = pipelineModel.transform(test)
+
+    predictions.show(50,truncate = false)
+    predictions.orderBy(desc("prediction")).show(50)
+
+    println("---------------------Summary----------------------------------------------")
+
+    predictions =  predictions.select("prediction","features", ArrDelay)
+
+    val regressionEvaluator = new RegressionEvaluator()
       .setLabelCol(ArrDelay)
       .setPredictionCol("prediction")
       .setMetricName("rmse")
 
-    val rmse = evaluator.evaluate(predictions2)
+    val rmse = regressionEvaluator.evaluate(predictions)
     println("Root Mean Squared Error (RMSE) on test data = " + rmse)
 
-    /*val trainingSummary = pipeModel.stages.last.asInstanceOf[LinearRegressionModel].summary
-    val trainingSummary = pipeModel.stages.last.asInstanceOf[GBTRegressionModel].sum
-    trainingSummary.residuals.show()
-    println(s"RMSE: ${trainingSummary.rootMeanSquaredError}")
-    println(s"r2: ${trainingSummary.r2}")*/
+    regressionTechnique match {
+
+      case 0 =>
+
+        val lrModel = pipelineModel.stages.last.asInstanceOf[LinearRegressionModel]
+
+        // Print the coefficients and intercept for linear regression
+        println(s"Coefficients: ${lrModel.coefficients} Intercept: ${lrModel.intercept}")
+
+        // Summarize the model over the training set and print out some metrics
+        val trainingSummary = lrModel.summary
+        println(s"numIterations: ${trainingSummary.totalIterations}")
+        println(s"RMSE: ${trainingSummary.rootMeanSquaredError}")
+        println(s"r2: ${trainingSummary.r2}")
+
+      case _ =>
+
+        val gbtModel = pipelineModel.stages.last.asInstanceOf[GBTRegressionModel]
+        println(s"Learned regression GBT model:\n ${gbtModel.toDebugString}")
+    }
 
     println("---------------------Result----------------------------------------------")
-
-
   }
 }
