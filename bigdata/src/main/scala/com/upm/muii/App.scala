@@ -10,6 +10,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.io.StdIn
+import scala.util.{Failure, Success, Try}
 
 /**
  * @author José Domínguez Pérez
@@ -21,6 +22,9 @@ object App {
   val AppName = "Big Data Project"
   val MasterUrl = "local"
   val StorageProtocol = "file://"
+
+  val LinearRegression = "Linear Regression"
+  val GradientBoostTree = "Gradient Boost Tree"
 
   val Year = "Year"
   val Month = "Month"
@@ -124,15 +128,65 @@ object App {
     sparkSession
   }
 
-  def loadData(session: SparkSession): DataFrame = {
+  def chooseTechnique(): String = {
 
-    println("Introduce the absolute path to the dataset file")
-    val filePath = StdIn.readLine().trim()
+    println("App: Choose the regression technique")
+    println(s"\t0: ${LinearRegression} (default)")
+    println(s"\t1: ${GradientBoostTree}")
 
-    session.read
-      .option("header", value = true)
-      .schema(FlightSchema)
-      .csv(StorageProtocol + filePath)
+    var technique = 0
+
+    Try(StdIn.readInt()) match {
+
+      case Success(num) => {
+        technique = num
+      }
+
+      case Failure(e) => {
+        println("App: You did not provide a number. The default value will be used.")
+      }
+    }
+
+    technique match {
+      case 1 => {GradientBoostTree}
+      case _ => {LinearRegression}
+    }
+  }
+
+  def loadData(session: SparkSession): Try[DataFrame] = {
+
+    var filePath: String = null
+
+    do {
+
+      println("App: Introduce the absolute path to the dataset file")
+      filePath = StdIn.readLine().trim()
+    } while (filePath == null || filePath.isEmpty)
+
+    try {
+
+      println(s"App: Trying to read from '$filePath'")
+
+      val extension = filePath.split("\\.").last
+
+      if ("csv" != extension) {
+
+        Failure(new Exception("You must provide a .csv file"))
+      } else {
+
+        val data = session.read
+          .option("header", value = true)
+          .schema(FlightSchema)
+          .csv(StorageProtocol + filePath)
+
+        Success(data)
+      }
+    } catch {
+
+      case unknown: Exception => {
+        Failure(unknown)
+      }
+    }
   }
 
   def filterVariables(data: DataFrame, vars: Array[String]): DataFrame = {
@@ -160,17 +214,34 @@ object App {
       results += metricsEvaluator.evaluate(predictions)
     }
 
-    println("Mean Squared Error (MSE) on test data = " + results(0))
-    println("Root Mean Squared Error (RMSE) on test data = " + results(1))
-    println("R^2 on test data = " + results(2))
-    println("Mean Absolute Error (MAE) on test data = " + results(3))
+    println("App: Mean Squared Error (MSE) on test data = " + results(0))
+    println("App: Root Mean Squared Error (RMSE) on test data = " + results(1))
+    println("App: R^2 on test data = " + results(2))
+    println("App: Mean Absolute Error (MAE) on test data = " + results(3))
   }
 
   def main(args : Array[String]) {
 
     val sparkSession = configureSpark()
 
-    val df = loadData(sparkSession)
+    val regressionTechnique = chooseTechnique()
+
+    println(s"App: You have chosen: ${regressionTechnique}")
+
+    var df: DataFrame = null
+
+    loadData(sparkSession) match {
+      case Success(data) => df = data
+      case Failure(ex) => {
+        println(s"App: Error: ${ex.getMessage}")
+        System.exit(1)
+      };
+    }
+
+    if (df.rdd.isEmpty()) {
+      println("App: The provided file is empty")
+      return
+    }
 
     val dfNoForbidden = filterVariables(df, ForbiddenVars)
     val dfCleaned = filterVariables(dfNoForbidden, UselessVars).na.fill(0)
@@ -184,14 +255,10 @@ object App {
       .setInputCols(Array(DepDelay,TaxiOut))
       .setOutputCol("features")
 
-    val regressionTechnique: Int = 1
-
     var pipelineStages: Array[PipelineStage] = null
 
     regressionTechnique match {
-      case 0 =>
-
-        println("You have chosen the Linear Regression technique")
+      case LinearRegression =>
 
         val regression = new LinearRegression()
           .setFeaturesCol("features")
@@ -201,9 +268,7 @@ object App {
 
         pipelineStages = Array(assembler,regression)
 
-      case _ =>
-
-        println("You have chosen the Gradient Boost Tree technique")
+      case GradientBoostTree =>
 
         val gbt = new GBTRegressor()
           .setFeaturesCol("features")
@@ -223,10 +288,10 @@ object App {
 
     predictions =  predictions.select("prediction","features", ArrDelay)
 
-    println("---------------Metrics computation---------------")
+    println("--------------------Metrics computation--------------------")
 
     computeMetrics(predictions)
 
-    println("---------------------Result----------------------------------------------")
+    println("--------------------Result--------------------")
   }
 }
