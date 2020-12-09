@@ -24,7 +24,8 @@ package.check <- lapply(
 )
 
 # Load the dataset information
-flightsData <- read_csv(file = '../../2008.csv')
+path <- readline("Introduce the path to the dataset file: ")
+flightsData <- read_csv(file = path)
 
 # Remove forbidden variables
 forbidden <- c("ArrTime",
@@ -73,3 +74,4 @@ ggplot(cleanFlightsData, aes(x=DepDelay, y=ArrDelay)) +
 ggplot(cleanFlightsData, aes(x=TaxiOut, y=ArrDelay)) + 
   geom_point(colour="blue", alpha=.2) + 
   geom_abline(colour="red") + theme_light()
+
