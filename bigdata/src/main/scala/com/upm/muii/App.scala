@@ -1,8 +1,10 @@
 package com.upm.muii
 
-import org.apache.spark.ml.evaluation.RegressionEvaluator
+import org.apache.spark.ml.evaluation.{BinaryClassificationEvaluator, RegressionEvaluator}
 import org.apache.spark.ml.feature.VectorAssembler
+import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.regression.{GBTRegressor, LinearRegression}
+import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}
 import org.apache.spark.ml.{Pipeline, PipelineStage}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
@@ -259,31 +261,60 @@ object App {
 
     var pipelineStages: Array[PipelineStage] = null
 
+    var paramGrid: Array[ParamMap] = null
+
     regressionTechnique match {
       case LinearRegression =>
 
         val regression = new LinearRegression()
           .setFeaturesCol("features")
           .setLabelCol(ArrDelay)
-          .setMaxIter(10)
-          .setElasticNetParam(0.8)
+//          .setMaxIter(10)
+//          .setElasticNetParam(0.8)
 
         pipelineStages = Array(assembler,regression)
+
+        paramGrid = new ParamGridBuilder()
+          .addGrid(regression.regParam, Array(0.1, 0.01))
+          .addGrid(regression.fitIntercept)
+          .addGrid(regression.elasticNetParam, Array(0.0, 1.0))
+          .build()
 
       case GradientBoostTree =>
 
         val gbt = new GBTRegressor()
           .setFeaturesCol("features")
           .setLabelCol(ArrDelay)
-          .setMaxIter(10)
+//          .setMaxIter(10)
 
         pipelineStages = Array(assembler, gbt)
+
+        paramGrid = new ParamGridBuilder()
+          .addGrid(gbt.maxDepth, Array(2, 5))
+          .addGrid(gbt.maxIter, Array(1, 10))
+          .build()
     }
 
     val pipeline = new Pipeline().setStages(pipelineStages)
-    val pipelineModel = pipeline.fit(training)
 
-    var predictions = pipelineModel.transform(test)
+    // Cross validation
+    val regEvaluator = new RegressionEvaluator()
+      .setLabelCol(ArrDelay)
+      .setPredictionCol("prediction")
+
+    val cv = new CrossValidator()
+      .setEstimator(pipeline)
+      .setEvaluator(regEvaluator)
+      .setEstimatorParamMaps(paramGrid)
+      .setNumFolds(3)
+      .setParallelism(2)
+
+    val cvModel = cv.fit(training)
+
+    var predictions = cvModel.transform(test)
+//    val pipelineModel = pipeline.fit(training)
+//
+//    var predictions = pipelineModel.transform(test)
 
     predictions.show(50,truncate = false)
     predictions.orderBy(desc("prediction")).show(50)
