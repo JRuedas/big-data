@@ -10,6 +10,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.io.StdIn
+import scala.reflect.io.File
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -165,22 +166,23 @@ object App {
 
     try {
 
-      println(s"App: Trying to read from '$filePath'")
-
       val extension = filePath.split("\\.").last
+
+      var fullPath: String = StorageProtocol + filePath
 
       if ("csv" != extension) {
 
-        Failure(new Exception("You must provide a .csv file"))
-      } else {
-
-        val data = session.read
-          .option("header", value = true)
-          .schema(FlightSchema)
-          .csv(StorageProtocol + filePath)
-
-        Success(data)
+        fullPath = fullPath + File.separator + "*.csv"
       }
+
+      println(s"App: Trying to read from '$fullPath'")
+
+      val data = session.read
+        .option("header", value = true)
+        .schema(FlightSchema)
+        .csv(fullPath)
+
+      Success(data)
     } catch {
 
       case unknown: Exception => {
