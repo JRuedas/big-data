@@ -1,12 +1,11 @@
 package com.upm.muii
 
-import org.apache.spark.ml.evaluation.{BinaryClassificationEvaluator, RegressionEvaluator}
+import org.apache.spark.ml.evaluation.RegressionEvaluator
 import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.regression.{GBTRegressor, LinearRegression}
 import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}
 import org.apache.spark.ml.{Pipeline, PipelineStage}
-import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
@@ -269,8 +268,6 @@ object App {
         val regression = new LinearRegression()
           .setFeaturesCol("features")
           .setLabelCol(ArrDelay)
-//          .setMaxIter(10)
-//          .setElasticNetParam(0.8)
 
         pipelineStages = Array(assembler,regression)
 
@@ -285,12 +282,11 @@ object App {
         val gbt = new GBTRegressor()
           .setFeaturesCol("features")
           .setLabelCol(ArrDelay)
-//          .setMaxIter(10)
 
         pipelineStages = Array(assembler, gbt)
 
         paramGrid = new ParamGridBuilder()
-          .addGrid(gbt.maxDepth, Array(2, 5))
+          .addGrid(gbt.maxDepth, Array(2, 10))
           .addGrid(gbt.maxIter, Array(1, 10))
           .build()
     }
@@ -302,29 +298,20 @@ object App {
       .setLabelCol(ArrDelay)
       .setPredictionCol("prediction")
 
-    val cv = new CrossValidator()
+    val crossValidator = new CrossValidator()
       .setEstimator(pipeline)
       .setEvaluator(regEvaluator)
       .setEstimatorParamMaps(paramGrid)
       .setNumFolds(3)
       .setParallelism(2)
 
-    val cvModel = cv.fit(training)
+    val cvModel = crossValidator.fit(training)
 
     var predictions = cvModel.transform(test)
-//    val pipelineModel = pipeline.fit(training)
-//
-//    var predictions = pipelineModel.transform(test)
-
-    predictions.show(50,truncate = false)
-    predictions.orderBy(desc("prediction")).show(50)
-
     predictions =  predictions.select("prediction","features", ArrDelay)
 
     println("--------------------Metrics computation--------------------")
 
     computeMetrics(predictions)
-
-    println("--------------------Result--------------------")
   }
 }
