@@ -19,9 +19,9 @@ import scala.util.{Failure, Success, Try}
  * @author Ismael Muñoz Aztout
  * @author Jonatan Ruedas Mora
  */
-object App {
+object FlightDelayPredictor {
 
-  val AppName = "Big Data Project"
+  val AppName = "Flight Delay Predictor"
   val MasterUrl = "local"
   val StorageProtocol = "file://"
 
@@ -132,7 +132,7 @@ object App {
 
   def chooseTechnique(): String = {
 
-    println("App: Choose the regression technique")
+    println("FlightDelayPredictor: Choose the regression technique")
     println(s"\t0: ${LinearRegression} (default)")
     println(s"\t1: ${GradientBoostTree}")
 
@@ -145,7 +145,7 @@ object App {
       }
 
       case Failure(e) => {
-        println("App: You did not provide a number. The default value will be used.")
+        println("FlightDelayPredictor: You did not provide a number. The default value will be used.")
       }
     }
 
@@ -161,7 +161,7 @@ object App {
 
     do {
 
-      println("App: Introduce the absolute path to the dataset file")
+      println("FlightDelayPredictor: Introduce the absolute path to the dataset file")
       filePath = StdIn.readLine().trim()
     } while (filePath == null || filePath.isEmpty)
 
@@ -176,7 +176,7 @@ object App {
         fullPath = fullPath + File.separator + "*.csv"
       }
 
-      println(s"App: Trying to read from '$fullPath'")
+      println(s"FlightDelayPredictor: Trying to read from '$fullPath'")
 
       val data = session.read
         .option("header", value = true)
@@ -217,10 +217,10 @@ object App {
       results += metricsEvaluator.evaluate(predictions)
     }
 
-    println("App: Mean Squared Error (MSE) on test data = " + results(0))
-    println("App: Root Mean Squared Error (RMSE) on test data = " + results(1))
-    println("App: R^2 on test data = " + results(2))
-    println("App: Mean Absolute Error (MAE) on test data = " + results(3))
+    println("FlightDelayPredictor: Mean Squared Error (MSE) on test data = " + results(0))
+    println("FlightDelayPredictor: Root Mean Squared Error (RMSE) on test data = " + results(1))
+    println("FlightDelayPredictor: R^2 on test data = " + results(2))
+    println("FlightDelayPredictor: Mean Absolute Error (MAE) on test data = " + results(3))
   }
 
   def main(args : Array[String]) {
@@ -229,20 +229,20 @@ object App {
 
     val regressionTechnique = chooseTechnique()
 
-    println(s"App: You have chosen: ${regressionTechnique}")
+    println(s"FlightDelayPredictor: You have chosen: ${regressionTechnique}")
 
     var df: DataFrame = null
 
     loadData(sparkSession) match {
       case Success(data) => df = data
       case Failure(ex) => {
-        println(s"App: Error: ${ex.getMessage}")
+        println(s"FlightDelayPredictor: Error: ${ex.getMessage}")
         System.exit(1)
       };
     }
 
     if (df.rdd.isEmpty()) {
-      println("App: The provided file is empty")
+      println("FlightDelayPredictor: The provided file is empty")
       return
     }
 
