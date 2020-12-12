@@ -249,7 +249,7 @@ object App {
     val dfNoForbidden = filterVariables(df, ForbiddenVars)
     val dfCleaned = filterVariables(dfNoForbidden, UselessVars).na.fill(0)
 
-    val split = dfCleaned.randomSplit(Array(0.7,0.3))
+    val split = dfCleaned.randomSplit(Array(0.7,0.3), seed = 98765L)
     val training = split(0)
 
     val test = split(1)
