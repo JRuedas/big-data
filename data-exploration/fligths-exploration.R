@@ -41,17 +41,14 @@ forbidden <- c("ArrTime",
 
 cleanFlightsData <- flightsData[, !(names(flightsData) %in% forbidden)]
 
-# Remove non numerical variables
-categorical <- c("UniqueCarrier",
-                 "TailNum",
-                 "Origin",
-                 "Dest",
-                 "CancellationCode")
-
-cleanFlightsData <- (cleanFlightsData[, !(names(cleanFlightsData) %in% categorical)])
+# Parse non numerical variables to factors
+cleanFlightsData$UniqueCarrier <- as.numeric(factor(cleanFlightsData$UniqueCarrier))
+cleanFlightsData$TailNum <- as.numeric(factor(cleanFlightsData$TailNum))
+cleanFlightsData$Origin <- as.numeric(factor(cleanFlightsData$Origin))
+cleanFlightsData$Dest <- as.numeric(factor(cleanFlightsData$Dest))
 
 # Remove useless variables
-useless <- c("Cancelled")
+useless <- c("Cancelled", "CancellationCode")
 
 cleanFlightsData <- (cleanFlightsData[, !(names(cleanFlightsData) %in% useless)])
 
