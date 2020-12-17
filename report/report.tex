@@ -29,18 +29,60 @@ For this analysis we have developed two projects.
 
 \section{Analysis}
 
-Once we have explained how our practical work is structured, we will explain how we carry out the exploratory analysis of the data to select the useful variables. To do this, we cleaned several values of the dataset like the forbidden variables and the variables that we considered useless. Apart from that, instead of omitting the NA values we gave a value of 0 to all the missing values because in some datasets (i.e., 1987) there were some related columns that were full of them.\\
+Once we have explained how our practical work is structured, we will explain how we carry out the exploratory analysis of the data to select the useful variables.\\
 
-When we were sure that the data was correctly cleaned we proceeded to generate the correlation matrix in which we could see which variables were strongly correlated with our variable target. As a result, we decided to use only the 2 most correlated variables because the other correlation values were quite low.\\
+To do this, we cleaned several values of the dataset like the forbidden variables and the variables that we have considered useless (\textit{Cancelled} and \textit{CancellationCode}). We also have created a new column called \textit{Date} that merges the \textit{Year}, \textit{Month} and \textit{DayofMonth} variables. Later, we have factorized the categorical values in order to prepare them to generate the correlation matrix. Apart from that, instead of omitting the NA values we gave a value of 0 to all the missing values because in some datasets (i.e., 1987) there were some related columns that were full of them.\\
 
-% Insertar imagenes matrices correlacion
+When we were sure that the data was correctly cleaned we proceeded to generate the correlation matrix in which we could see which variables were strongly correlated with our target variable. As a result, we decided to use only the 2 most correlated variables because the other correlation values were quite low.\\
 
-After that, we generated a scatterplot for the 2 selected variables to see how they correlate with the target variable.
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=.4]{1987_corr_matrix}
+	\caption{1987 correlation matrix}
+\end{figure}
 
-% Insertar imagenes scatterplot correlacion
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=.4]{2008_corr_matrix}
+	\caption{2008 correlation matrix}
+\end{figure}
 
-\subsection{Conclusions}
-As a conclusion, and after carrying out different tests with different datasets, we decided to use the DepDelay and TaxiOut variables in order to make our prediction for the aforementioned reasons, discarding the rest of the variables as they have a very low correlation index or they were not correlated at all.
+After that, we generated a scatterplot for the 2 selected variables to see how they correlate with the target variable. We realized that in some datasets, like 1987, the TaxiOut variable was full of NA values but when it does have value it influences the ArrDelay so we decided to keep that variable and use it to build the model. The figure \ref{fig:1987_taxi_out} shows that graphic because we used 0 to replace NA and the column only had missing values. \\
+
+\begin{figure}[H]
+	\centering
+	\begin{minipage}{.45\textwidth}
+		\centering
+		\includegraphics[width=1\textwidth]{1987_dep_delay}
+		\caption{1987 ArrDelay vs DepDelay}
+		\label{fig:1987_dep_delay}
+	\end{minipage}\hfill
+	\begin{minipage}{.45\textwidth}
+		\centering
+		\includegraphics[width=1\textwidth]{1987_taxi_out}
+		\caption{1987 ArrDelay vs TaxiOut}
+		\label{fig:1987_taxi_out}
+	\end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{minipage}{.45\textwidth}
+		\centering
+		\includegraphics[width=1\textwidth]{2008_dep_delay}
+		\caption{2008 ArrDelay vs DepDelay}
+		\label{fig:2008_dep_delay}
+	\end{minipage}\hfill
+	\begin{minipage}{.45\textwidth}
+		\centering
+		\includegraphics[width=1\textwidth]{2008_taxi_out}
+		\caption{2008 ArrDelay vs TaxiOut}
+		\label{fig:2008_taxi_out}
+	\end{minipage}
+\end{figure}
+
+\subsection{Insights}
+After carrying out different tests with different datasets, we decided to use the DepDelay and TaxiOut variables in order to make our prediction for the aforementioned reasons, discarding the rest of the variables as they have a very low correlation index or they were not correlated at all.
 
 \section{Variable selection}
 
@@ -48,46 +90,44 @@ As a conclusion, and after carrying out different tests with different datasets,
 We have selected the following variables:
 
 \begin{itemize}
-	\item DepDelay
-	\item TaxiOut
+	\item \textit{DepDelay}
+	\item \textit{TaxiOut}
 \end{itemize}
 
 \subsection{Excluded variables}
 Forbidden variables:
 
 \begin{itemize}
-	\item Arrtime
-	\item ActualElapsedtime
-	\item AirTime
-	\item TaxiIn
-	\item Diverted
-	\item CarrierDelay
-	\item WeatherDelay
-	\item NASDelay
-	\item SecurityDelay
-	\item LateAircraftDelay
+	\item \textit{Arrtime}
+	\item \textit{ActualElapsedtime}
+	\item \textit{AirTime}
+	\item \textit{TaxiIn}
+	\item \textit{Diverted}
+	\item \textit{CarrierDelay}
+	\item \textit{WeatherDelay}
+	\item \textit{NASDelay}
+	\item \textit{SecurityDelay}
+	\item \textit{LateAircraftDelay}
 \end{itemize}
 
-Categorical variables have been removed because the majority were identifiers that do not relate to the flight delay. These variables are:
+Categorical variables have been factorized in order to have numerical variables. These variables are:
 
 \begin{itemize}
-	\item UniqueCarrier
-	\item TailNum
-	\item Origin
-	\item Dest
+	\item \textit{UniqueCarrier}
+	\item \textit{TailNum}
+	\item \textit{Origin}
+	\item \textit{Dest}
 \end{itemize}
 
-The \textit{cancel} and \textit{CancellationCode} variables has been excluded because when a flight is cancelled, it will not arrive to the destination and it will be useless to predict arrival delay.\\
+The \textit{Cancelled} and \textit{CancellationCode} variables has been excluded because when a flight is cancelled, it will not arrive to the destination and it will be useless to predict arrival delay.\\
 
-When cleaning the dataset, we also remove all of the variables that only have NA values. For example, in the dataset of 1987, the variable TAXIOUT disappears as all of their values are NA.\\
-
-The rest of the variables (except DepDelay and TaxiOut) have also been removed since their level of correlation with the target variable is very weak.
+When cleaning the dataset in Scala, we remove all of the forbidden variables and what we call \textit{useless} variables that are the ones that have a weak level of correlation (under 0.25 more or less) with the target variable.
 
 \subsection{Transformed variables}
-We have transformed the categorical variables in our dataset into numbers by factorizing them. This way, we can assignee them a numerical value in order to perform calculations such as correlation.
+We have transformed the categorical variables in our dataset into numbers by factorizing them. This way, we can assign them a numerical value in order to perform calculations such as correlation.
 
 \subsection{Created variables}
-We have not created new variables.
+We have created a new column called \textit{Date} that merges the \textit{Year}, \textit{Month} and \textit{DayofMonth} variables but we discarded later because it was not correlated to the target variable.
 
 \section{Machine learning model}
 
@@ -126,7 +166,11 @@ Firstly, we have divided our dataset into two parts:
 		
 Secondly, apart from splitting out the dataset into the training and test dataset, we also divide the training part into different validation sets in order to conduct cross-validation. This validation process is used to find the best parameters for our machine learning algorithm, which is also called hyper-parameter tuning. This way, we can select the best parameters for our model before assessing its performance with the test data. More specifically, we are going to make use of the K-fold cross-validation, where training data is randomly partitioned into K equal sized subsets that are used to validate the remaining training data. Next, we will show an illustration to clarify the whole process of validation we have implemented. In this example, a K-fold cross-validation of K=5 has been used.\\
 
-% Grafico pepin traing-test
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=.8]{cross_validation}
+	\caption{Validation process}
+\end{figure}
 
 Once we have found the parameters that best fit the model, we can use these parameters to assess the actual accuracy of our model by evaluating it with the test set. Next, we will discuss the metrics we have used to assess the accuracy of the models. As we have implemented regression algorithms in order to predict the target variable (since this variable is continuous), we have used the following regression metrics:
 

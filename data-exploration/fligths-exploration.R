@@ -23,9 +23,17 @@ package.check <- lapply(
   }
 )
 
+# Defines the type of the columns
+types = cols(.default = col_integer(),
+                 UniqueCarrier = col_character(),
+                 TailNum = col_character(),
+                 Origin = col_character(),
+                 Dest = col_character(),
+                 CancellationCode = col_character())
+
 # Load the dataset information
 path <- readline("Introduce the path to the dataset file: ")
-flightsData <- read_csv(file = path)
+flightsData <- read_csv(file = path, col_types = types)
 
 # Remove forbidden variables
 forbidden <- c("ArrTime",
@@ -41,20 +49,23 @@ forbidden <- c("ArrTime",
 
 cleanFlightsData <- flightsData[, !(names(flightsData) %in% forbidden)]
 
-# Parse non numerical variables to factors
-cleanFlightsData$UniqueCarrier <- as.numeric(factor(cleanFlightsData$UniqueCarrier))
-cleanFlightsData$TailNum <- as.numeric(factor(cleanFlightsData$TailNum))
-cleanFlightsData$Origin <- as.numeric(factor(cleanFlightsData$Origin))
-cleanFlightsData$Dest <- as.numeric(factor(cleanFlightsData$Dest))
-
 # Remove useless variables
 useless <- c("Cancelled", "CancellationCode")
 
 cleanFlightsData <- (cleanFlightsData[, !(names(cleanFlightsData) %in% useless)])
 
-# Clean columns full of NA values
-cleanFlightsData<-cleanFlightsData[colSums(!is.na(cleanFlightsData)) > 0]
-cleanFlightsData<-na.omit(cleanFlightsData)
+# Create new date column
+cleanFlightsData$Date <- as.Date(with(cleanFlightsData, paste(DayofMonth, Month, Year,sep="-")), "%d-%m-%Y")
+
+# Parse non numerical variables to factors
+cleanFlightsData$UniqueCarrier <- as.numeric(factor(cleanFlightsData$UniqueCarrier))
+cleanFlightsData$TailNum <- as.numeric(factor(cleanFlightsData$TailNum))
+cleanFlightsData$Origin <- as.numeric(factor(cleanFlightsData$Origin))
+cleanFlightsData$Dest <- as.numeric(factor(cleanFlightsData$Dest))
+cleanFlightsData$Date <- as.numeric(factor(cleanFlightsData$Date))
+
+# Replace NA with 0
+cleanFlightsData[is.na(cleanFlightsData)] <- 0
 
 # Correlation matrix
 corMatrix <- cor(cleanFlightsData)
