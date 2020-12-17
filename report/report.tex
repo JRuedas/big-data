@@ -168,7 +168,7 @@ Secondly, apart from splitting out the dataset into the training and test datase
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=.8]{cross_validation}
+	\includegraphics[scale=.8]{validation}
 	\caption{Validation process}
 \end{figure}
 
@@ -194,7 +194,19 @@ Then, we have the first 3 metric errors, which are very similar metrics that tel
 
 \subsection{Model evaluation}
 
-% Pantallazo salida
+The results that we have obtained using the dataset of the year 2008 are these.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=.8]{result_2008_linear}
+	\caption{Linear Regression result}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=.8]{result_2008_gbt}
+	\caption{Gradient Boosted Tree result}
+\end{figure}
 
 As we can see, the linear regression algorithm is much more precise than the GBT algorithm due to the fact that the RMSE for the linear regression is almost half of the GBT. Also, we can see that all of the others metrics are better for the linear regression model.\\
 
@@ -210,10 +222,20 @@ You do not need to have a specific location where the data set is, the only thin
 
 \subsection{ML technique selection}
 
+We have 2 possible techniques to perform the model construction, Linear Regression and Gradient Boosted Tree. You have to select one of those techniques using the keyboard numbers 0 or 1. By default Linear Regression will be used.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=.8]{app_start}
+	\caption{App start parameters}
+\end{figure}
+
+\subsection{Error handling}
+
+We check some errors like empty folders, not \textit{.csv} file or wrong technique selection, those errors are managed through exceptions and terminate the execution of the program.
+
 \section{Final conclusions}
 
 We found this project very interesting, in addition to be able to get a little fluency programming spark looking information in the notes of this subject and the official pages of spark. The main problem was the statistical aspect because we do not have advanced background about this field, even though, this project has been educative and interesting.
-
-\section{References}
 
 \end{document}
