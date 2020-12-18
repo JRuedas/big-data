@@ -164,12 +164,13 @@ Firstly, we have divided our dataset into two parts:
 			\item The \textbf{test set}: used to assess the actual performance of the chosen algorithm. When training the dataset, we are provided with different metrics that can be used to validate our model. However, these metrics are calculated based on the training data and we need to ensure that this algorithm is also accurate with respect to independent data that has not been used in the training step. This is why we keep a part of the dataset that has not been used for training.
 		\end{itemize}
 		
-Secondly, apart from splitting out the dataset into the training and test dataset, we also divide the training part into different validation sets in order to conduct cross-validation. This validation process is used to find the best parameters for our machine learning algorithm, which is also called hyper-parameter tuning. This way, we can select the best parameters for our model before assessing its performance with the test data. More specifically, we are going to make use of the K-fold cross-validation, where training data is randomly partitioned into K equal sized subsets that are used to validate the remaining training data. Next, we will show an illustration to clarify the whole process of validation we have implemented. In this example, a K-fold cross-validation of K=5 has been used.\\
+Secondly, apart from splitting out the dataset into the training and test dataset, we also divide the training part into different validation sets in order to conduct cross-validation. This validation process is used to find the best parameters for our machine learning algorithm, which is also called hyper-parameter tuning. This way, we can select the best parameters for our model before assessing its performance with the test data. More specifically, we are going to make use of the K-fold cross-validation, where training data is randomly partitioned into K equal sized subsets that are used to validate the remaining training data. Next, we will show an illustration to clarify the whole process of validation we have implemented. In the figure \ref{fig:validation}, a K-fold cross-validation of K=5 has been used. We have used the mininum recommended value for that parameter, K=3\\
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=.8]{validation}
 	\caption{Validation process}
+	\label{fig:validation}
 \end{figure}
 
 Once we have found the parameters that best fit the model, we can use these parameters to assess the actual accuracy of our model by evaluating it with the test set. Next, we will discuss the metrics we have used to assess the accuracy of the models. As we have implemented regression algorithms in order to predict the target variable (since this variable is continuous), we have used the following regression metrics:
@@ -214,11 +215,9 @@ Therefore, we can conclude that it would be much more optimal to use the linear 
 
 \section{Execution instructions}
 
-To be able to run out app, you only have to press the run button. After that choose which algorithm you want to test and put the path where the data collection is in cvs format.
-
 \subsection{Input data}
 
-You do not need to have a specific location where the data set is, the only thing you should keep in mind is to put the correct path to run the app.
+You have to provide the full path where your dataset is stored or the folder with all the datasets.
 
 \subsection{ML technique selection}
 
@@ -236,6 +235,6 @@ We check some errors like empty folders, not \textit{.csv} file or wrong techniq
 
 \section{Final conclusions}
 
-We found this project very interesting, in addition to be able to get a little fluency programming spark looking information in the notes of this subject and the official pages of spark. The main problem was the statistical aspect because we do not have advanced background about this field, even though, this project has been educative and interesting.
+We found this project very interesting, we really enjoyed the Scala programming and Spark documentation was really well written so it was easy to find out how to solve the problems. The main problem was the statistical aspect because we do not have advanced background about this field, even though, this project has been educative and interesting.
 
 \end{document}
