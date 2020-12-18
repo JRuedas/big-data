@@ -1,0 +1,125 @@
+% Clase del documento
+\documentclass[a4paper,12pt,twoside,openright,titlepage]{book}
+
+%
+% Paquetes necesarios
+%
+
+% Codificación UTF8
+\usepackage[utf8]{inputenc}
+% Title
+\usepackage{titling}
+% Márgenes
+\usepackage[hmargin=3cm,vmargin=3.5cm]{geometry}
+% Definición de colores
+\usepackage{color}
+% Extensión del paquete color
+\usepackage[table,xcdraw,dvipsnames]{xcolor}
+% Cabecera y pie de página
+\usepackage{fancyhdr}
+% Estilo título capítulos
+\usepackage{quotchap}
+% Títulos de secciones
+\usepackage{titlesec}
+% Enumeraciones
+\usepackage{enumerate}
+% Páginas en blanco
+\usepackage{emptypage}
+% Código, algoritmos, etc.
+\usepackage{listings}
+% Separación entre cajas
+\usepackage{float}
+% Imágenes
+\usepackage[pdftex]{graphicx}
+% Incluir pdfs externos
+\usepackage{pdfpages}
+% Apéndices
+\usepackage{appendix}
+% Marcadores (para el pdf)
+\usepackage{bookmark}
+% Estilo de enumeraciones
+\usepackage{enumitem}
+% Espacio entre líneas y párrafos
+\usepackage{setspace}
+% Glosario/Acrónimos
+\usepackage[acronym]{glossaries}
+% Fuentes
+\usepackage[T1]{fontenc}
+
+% Subtitle
+\newcommand{\subtitle}[1]{%
+	\posttitle{%
+		\par\end{center}
+		\begin{center}\large#1\end{center}
+		\vskip0.5em
+		}%
+}
+
+% Enlaces
+\hypersetup{hidelinks,pageanchor=true,colorlinks,citecolor=Fuchsia,urlcolor=black,linkcolor=Cerulean}
+
+% Euro (€)
+\DeclareUnicodeCharacter{20AC}{\euro}
+
+% Inclusión de gráficos
+\graphicspath{{./images/}}
+
+% Extensiones de gráficos
+\DeclareGraphicsExtensions{.pdf,.jpeg,.jpg,.png}
+
+% Definiciones de colores (para hidelinks)
+\definecolor{LightCyan}{rgb}{0,0,0}
+\definecolor{Cerulean}{rgb}{0,0,0}
+\definecolor{Fuchsia}{rgb}{0,0,0}
+
+% Estilo páginas de capítulos
+\fancypagestyle{plain}{
+\fancyhf{}
+\fancyfoot[CO]{\thepage}
+\renewcommand{\footrulewidth}{.6pt}
+\renewcommand{\headrulewidth}{0.0pt}
+}
+
+% Estilo resto de páginas
+\pagestyle{fancy}
+
+\renewcommand\thesection{\arabic{section}}
+
+% Guía del pie de página
+\renewcommand{\footrulewidth}{.6pt}
+
+% Nombre del titulo para indice de codigo
+\renewcommand\lstlistlistingname{Table of code}
+
+% Nombre de los bloques de código
+\renewcommand{\lstlistingname}{Code}
+
+% Estilo de los lstlistings
+\lstset{
+    frame=tb,
+    breaklines=true,
+    showstringspaces=false,
+    postbreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\color{gray}\hookrightarrow\space}}
+}
+
+% Definiciones de funciones para los títulos
+\newlength\salto
+\setlength{\salto}{3.5ex plus 1ex minus .2ex}
+\newlength\resalto
+\setlength{\resalto}{2.3ex plus.2ex}
+
+% Estilo de los acrónimos
+\renewcommand{\acronymname}{Acronym}
+\renewcommand{\glossaryname}{Acronym}
+\pretolerance=2000
+\tolerance=3000
+
+% Comando code (lstlisting sin cambio de página)
+\lstnewenvironment{code}[1][]%
+  { \noindent\minipage{0.935\linewidth}\medskip
+    \vspace{5mm}
+    \lstset{basicstyle=\ttfamily\footnotesize,#1}}
+  {\endminipage}
+
+% Numerado hasta sub subsecciones
+\setcounter{secnumdepth}{3}
